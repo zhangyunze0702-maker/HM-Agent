@@ -13,7 +13,7 @@ import os
 if os.path.exists("logs/backend.log"):
     open("logs/backend.log", 'w').close()
 
-app = FastAPI(title="黑马点评 AI Agent 后端")
+app = FastAPI(title="AI Agent 后端")
 agent_app = create_agent_app()
 backend_log = get_logger("API_SERVER")
 
@@ -91,10 +91,9 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
 
 
 if __name__ == "__main__":
-    # 打印华丽的启动提示
     print("\n" + "=" * 70)
     print("点评 AI Agent 后端服务已准备就绪！")
-    print("强烈建议：请打开一个新的 PowerShell 终端，执行以下命令实时监控 AI 大脑思考过程：")
+    print("建议：请打开一个新的 PowerShell 终端，执行以下命令实时监控 AI 思考过程：")
     print("-" * 70)
     print("chcp 65001")
     print('Get-Content -Path "logs/backend.log" -Wait -Tail 10 -Encoding utf8')
