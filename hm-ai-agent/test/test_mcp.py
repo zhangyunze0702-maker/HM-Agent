@@ -14,22 +14,22 @@ async def run_test():
         env=os.environ.copy()  # 确保环境变量传递，以便连接 Redis
     )
 
-    print("🚀 正在连接 MCP Server...")
+    print("正在连接 MCP Server...")
 
     # 2. 建立 stdio 通信隧道
     async with stdio_client(server_params) as (read, write):
         async with ClientSession(read, write) as session:
-            # 💡 初始化会话
+            # 初始化会话
             await session.initialize()
-            print("✅ 会话初始化成功！")
+            print("会话初始化成功！")
 
-            # 💡 列出可用工具
+            # 列出可用工具
             tools = await session.list_tools()
-            print(f"🛠️ 发现可用工具: {[t.name for t in tools.tools]}")
+            print(f"发现可用工具: {[t.name for t in tools.tools]}")
 
-            # 💡 调用 search_shops_mcp 工具进行测试
+            # 调用 search_shops_mcp 工具进行测试
             test_query = "找一家好吃的火锅店"
-            print(f"🔍 模拟调用: search_shops_mcp(query='{test_query}')")
+            print(f"模拟调用: search_shops_mcp(query='{test_query}')")
 
             result = await session.call_tool(
                 "search_shops_mcp",
@@ -37,7 +37,7 @@ async def run_test():
             )
 
             print("\n" + "=" * 40)
-            print("📊 MCP Server 返回结果：")
+            print("MCP Server 返回结果：")
             print("=" * 40)
             # 提取返回的文本内容
             for content in result.content:
