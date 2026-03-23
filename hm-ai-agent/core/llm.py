@@ -15,7 +15,7 @@ def get_llm():
     api_key = os.getenv("AUTODL_API_KEY", "sk-1234")
 
     if not base_url:
-        raise ValueError("🚨 请在 .env 文件中配置 AUTODL_BASE_URL")
+        raise ValueError("请在 .env 文件中配置 AUTODL_BASE_URL")
 
     # 使用 ChatOpenAI 包装器，但指向我们自己的服务器
     llm = ChatOpenAI(
@@ -31,7 +31,7 @@ def get_llm():
 
 # ================= 阶段测试 =================
 if __name__ == "__main__":
-    print("🔌 正在连接 AutoDL 云端大模型...")
+    print("正在连接 AutoDL 云端大模型...")
     try:
         llm = get_llm()
 
@@ -46,8 +46,8 @@ if __name__ == "__main__":
         # 调用大模型 (invoke)
         response = llm.invoke(messages)
 
-        print("🎉 收到远端响应！")
-        print(f"🤖 AI 回复: {response.content}")
+        print("收到远端响应！")
+        print(f"AI 回复: {response.content}")
 
     except Exception as e:
-        print(f"❌ 连接失败，请检查 AutoDL 服务是否启动，以及 BASE_URL 是否正确: {e}")
+        print(f"连接失败，请检查 AutoDL 服务是否启动，以及 BASE_URL 是否正确: {e}")
