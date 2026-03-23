@@ -34,7 +34,7 @@ def safe_append_import(json_file):
                 real_id = cursor.lastrowid  # 拿到数据库刚分配的 ID (比如15, 16...)
                 id_map[temp_id] = real_id
 
-            print(f"✅ 成功追加 {len(id_map)} 家商铺。")
+            print(f"成功追加 {len(id_map)} 家商铺。")
 
             # --- 2. 插入新笔记 ---
             for b in raw_data['blogs']:
@@ -50,14 +50,14 @@ def safe_append_import(json_file):
                     sql = f"INSERT INTO tb_blog ({', '.join(keys)}) VALUES ({', '.join(['%s'] * len(keys))})"
                     cursor.execute(sql, values)
                 else:
-                    print(f"⚠️ 跳过失效笔记：找不到 temp_id {temp_shop_id}")
+                    print(f"跳过失效笔记：找不到 temp_id {temp_shop_id}")
 
             conn.commit()
-            print(f"🚀 数据安全追加完成！1-14 号旧数据毫发无损。")
+            print(f"数据安全追加完成！1-14 号旧数据毫发无损。")
 
     except Exception as e:
         conn.rollback()
-        print(f"❌ 错误: {e}")
+        print(f"错误: {e}")
     finally:
         conn.close()
 
