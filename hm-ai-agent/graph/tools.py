@@ -10,8 +10,6 @@ from core.logger import get_logger
 from rag.reranker import rerank_docs
 
 # ================= 制造工具 (Tools) =================
-
-
 # 初始化专属于工具层的 logger，这样日志中会显示 [SHOP_TOOL]
 tool_log = get_logger("SHOP_TOOL")
 
@@ -26,7 +24,7 @@ def search_shops(query: str) -> str:
     高级检索工具：采用混合检索+重排技术。
     当用户寻找餐厅、寻找推荐、询问附近有什么好吃的时使用。
     """
-    tool_log.info(f"🔍 收到检索请求: '{query}'")
+    tool_log.info(f"收到检索请求: '{query}'")
 
     try:
         # 1. 召回阶段 (Retrieval)
@@ -36,16 +34,16 @@ def search_shops(query: str) -> str:
         initial_docs = retriever.invoke(query)
 
         if not initial_docs:
-            tool_log.warning(f"⚠️ 未命中任何结果: '{query}'")
+            tool_log.warning(f"未命中任何结果: '{query}'")
             return "【系统状态】: 数据库中未找到相关信息，请引导用户更换搜索词。"
 
         # 2. 重排阶段 (Rerank)
-        tool_log.info(f"⚖️ 正在进行 Rerank (召回数: {len(initial_docs)})")
+        tool_log.info(f"正在进行 Rerank (召回数: {len(initial_docs)})")
         # 使用 FlashRank 进行精排
         reranked_docs = rerank_docs(query, initial_docs, top_n=3)
-        tool_log.info(f"✅ Rerank 完成，选取 Top-{len(reranked_docs)}")
+        tool_log.info(f"Rerank 完成，选取 Top-{len(reranked_docs)}")
 
-        # 3. 格式化输出 (💡 最强大脑核心改造区：机器可读性 + JSON 防御)
+        # 3. 格式化输出 =
         res = [
             "【系统数据返回】(以下为结构化业务数据，请严格提取 SHOP_ID 并保持你的 JSON 输出规范)："
         ]
@@ -59,22 +57,21 @@ def search_shops(query: str) -> str:
             # --- 核心对齐逻辑：智能提取正确的业务 ID ---
             raw_id = m.get('shop_id') or m.get('id')
 
-            # 🛡️ 终极防御：如果拿到的是长乱码或空值，直接在工具层拦截！
+            # 长乱码或空值，拦截
             if not raw_id or (isinstance(raw_id, str) and len(raw_id) > 20):
-                tool_log.warning(f"⚠️ 拦截脏数据 (名称: {name}, ID: {raw_id})")
+                tool_log.warning(f"拦截脏数据 (名称: {name}, ID: {raw_id})")
                 continue
 
             business_id = str(raw_id)
             score = m.get('relevance_score', 0)
             valid_count += 1
 
-            # 🛡️ JSON 安全屏障：彻底清洗可能导致 LLM 输出错误 JSON 的危险字符
+            # JSON 清洗危险字符
             # 将双引号替换为单引号，将换行符替换为空格
             raw_content = str(doc.page_content[:150])
             safe_content = re.sub(r'[\n\r]+', ' ', raw_content) # 剥离换行
             safe_content = safe_content.replace('"', "'")       # 剥离双引号
 
-            # 🤖 机器友好格式：采用 Key-Value 形式，抑制大模型的“闲聊冲动”
             info = (
                 f"--- ITEM {valid_count} ---\n"
                 f"TYPE: {doc_type}\n"
@@ -87,15 +84,15 @@ def search_shops(query: str) -> str:
 
         # 兜底：如果过滤完发现全是脏数据
         if valid_count == 0:
-            tool_log.error("❌ 严重警告：检索到的 Top 数据全部没有合法的业务 ID！")
+            tool_log.error("严重警告：检索到的 Top 数据全部没有合法的业务 ID！")
             return "【系统状态】: 数据异常（缺失合法店铺ID），暂无法提供详情。请更换搜索词。"
 
         final_result = "\n".join(res)
-        tool_log.info(f"📤 [DEBUG] 发给大模型的安全文本:\n{final_result[:400]}\n" + "-" * 50)
+        tool_log.info(f"[DEBUG] 发给大模型的安全文本:\n{final_result[:400]}\n" + "-" * 50)
         return final_result
 
     except Exception as e:
-        tool_log.error(f"❌ 检索系统发生崩溃: {str(e)}", exc_info=True)
+        tool_log.error(f"检索系统发生崩溃: {str(e)}", exc_info=True)
         return f"【系统状态】: 检索服务当前异常 (Error: {str(e)})"
 
 
@@ -126,8 +123,7 @@ def claim_voucher_tool(voucher_id: str, config: RunnableConfig) -> str:
     为用户抢购指定 ID 的优惠券。
     注意：必须传入数字形式的 voucher_id，严禁传入优惠券名称。
     """
-    # 🕵️ 从 config 的 configurable 中提取前端传来的 authorization
-    # 这样 Token 就实现了透传，而模型完全感知不到它的存在
+    # 实现透传
     auth_token = config.get("configurable", {}).get("authorization")
 
     # 调用解耦后的 API 方法
