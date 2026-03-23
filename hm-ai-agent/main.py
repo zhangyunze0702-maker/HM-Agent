@@ -79,9 +79,9 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
 
     # 如果前端没传 token，可以根据业务需求报错或允许匿名
     if not token:
-        backend_log.warning("⚠️ 未检测到 authorization header")
+        backend_log.warning("未检测到 authorization header")
 
-    backend_log.info(f"📩 收到前端请求: {chat_request.message} | Token: {token[:30] if token else 'None'}...")
+    backend_log.info(f"收到前端请求: {chat_request.message} | Token: {token[:30] if token else 'None'}...")
 
     # 2. 将 token 传递给生成器
     return StreamingResponse(
@@ -93,8 +93,8 @@ async def chat_endpoint(request: Request, chat_request: ChatRequest):
 if __name__ == "__main__":
     # 打印华丽的启动提示
     print("\n" + "=" * 70)
-    print("🚀 点评 AI Agent 后端服务已准备就绪！")
-    print("💡 强烈建议：请打开一个新的 PowerShell 终端，执行以下命令实时监控 AI 大脑思考过程：")
+    print("点评 AI Agent 后端服务已准备就绪！")
+    print("强烈建议：请打开一个新的 PowerShell 终端，执行以下命令实时监控 AI 大脑思考过程：")
     print("-" * 70)
     print("chcp 65001")
     print('Get-Content -Path "logs/backend.log" -Wait -Tail 10 -Encoding utf8')
