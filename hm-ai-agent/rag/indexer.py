@@ -17,8 +17,7 @@ def ingest_data_to_redis():
 
     try:
         with db.cursor(pymysql.cursors.DictCursor) as cursor:
-            # --- 1. 处理店铺数据 (tb_shop) ---
-            print("🚀 [1/3] 提取 tb_shop 数据...")
+            # 处理店铺数据 (tb_shop)
             sql_shop = "SELECT id, name, type_id, area, address, avg_price, score FROM tb_shop"
             cursor.execute(sql_shop)
             for shop in cursor.fetchall():
@@ -40,8 +39,7 @@ def ingest_data_to_redis():
                     }
                 ))
 
-            # --- 2. 处理探店笔记数据 (tb_blog) ---
-            print("🚀 [2/3] 提取 tb_blog 数据并关联店铺名...")
+            # 处理探店笔记数据 (tb_blog)
             # 关联 shop 表拿到店铺名，增加 AI 检索时的上下文
             sql_blog = """
                 SELECT b.id, b.shop_id, b.title, b.content, s.name as shop_name 
@@ -63,16 +61,15 @@ def ingest_data_to_redis():
                         "name": blog['title']
                     }
                 ))
-        print(f"✅ 成功构造 {len(documents)} 条向量文档！")
+        print(f"成功构造 {len(documents)} 条向量文档！")
 
     except Exception as e:
-        print(f"❌ 数据提取失败: {e}")
+        print(f"数据提取失败: {e}")
         return
     finally:
         db.close()
 
-    # --- 3. 向量化并写入 Redis Stack ---
-    print(f"📦 正在加载模型并写入 Redis Stack...")
+    # 向量化并写入
     embeddings = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL_NAME)
     redis_url = f"redis://{REDIS_HOST}:{REDIS_PORT}/0"
 
@@ -82,7 +79,6 @@ def ingest_data_to_redis():
         redis_url=redis_url,
         index_name="idx:hmdp_v1"  # 使用统一的混合索引
     )
-    print("🎉 向量数据同步完成！你可以去 localhost:8001 查看了。")
 
 
 if __name__ == "__main__":
