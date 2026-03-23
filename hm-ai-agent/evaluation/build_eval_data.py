@@ -6,9 +6,7 @@ import re
 
 from langchain_core.messages import HumanMessage, ToolMessage, AIMessage
 
-# ==========================================
-# 1. 🛡️ 环境补丁：处理子目录导入与路径问题
-# ==========================================
+# 环境补丁：处理子目录导入与路径问题
 # 获取当前脚本所在目录 (evaluation/)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 # 获取项目根目录 (hm-ai-agent/)
@@ -24,17 +22,15 @@ try:
 
     # 调用工厂函数生成真正的 LangGraph 实例
     agent_graph = create_agent_app()
-    print("✅ [系统] 成功通过工厂函数实例化 LangGraph 引擎")
+    print("[系统] 成功通过工厂函数实例化 LangGraph 引擎")
 except ImportError as e:
-    print(f"❌ [错误] 导入失败，请检查 graph/workflow.py 路径。错误: {e}")
+    print(f"[错误] 导入失败，请检查 graph/workflow.py 路径。错误: {e}")
     sys.exit(1)
 except Exception as e:
-    print(f"❌ [错误] 实例化 Agent 失败，请检查配置或数据库连接。错误: {e}")
+    print(f"[错误] 实例化 Agent 失败，请检查配置或数据库连接。错误: {e}")
     sys.exit(1)
 
-# ==========================================
-# 2. 📝 测试用例库：问题与人类标准答案 (Ground Truth)
-# ==========================================
+# 测试用例库：问题与人类标准答案 (Ground Truth)
 TEST_CASES = [
     {
         "question": "帮我查找103茶餐厅。",
@@ -58,19 +54,19 @@ def build_dataset():
         "ground_truth": []
     }
 
-    print(f"🚀 [启动] 开始收集数据，共 {len(TEST_CASES)} 组测试用例...")
+    print(f"[启动] 开始收集数据，共 {len(TEST_CASES)} 组测试用例...")
 
     for index, case in enumerate(TEST_CASES):
         q = case["question"]
         gt = case["ground_truth"]
-        print(f"\n📊 [{index + 1}/{len(TEST_CASES)}] 正在运行: {q}")
+        print(f"\n[{index + 1}/{len(TEST_CASES)}] 正在运行: {q}")
 
         # 构造输入状态与配置
         state = {"messages": [HumanMessage(content=q)]}
         config = {"configurable": {"thread_id": f"eval_{uuid.uuid4().hex[:6]}"}}
 
         try:
-            # 💡 核心调用：执行 Agent 逻辑
+            # 核心调用：执行 Agent 逻辑
             result = agent_graph.invoke(state, config=config)
 
             contexts = []
@@ -98,14 +94,12 @@ def build_dataset():
             eval_dataset_dict["answer"].append(final_answer)
             eval_dataset_dict["ground_truth"].append(gt)
 
-            print(f"✅ 成功提取：召回了 {len(contexts)} 条知识片段")
+            print(f"成功提取：召回了 {len(contexts)} 条知识片段")
 
         except Exception as e:
-            print(f"❌ 运行失败: {e}")
+            print(f"运行失败: {e}")
 
-    # ==========================================
-    # 3. 💾 数据落盘：保存为 JSON 文件
-    # ==========================================
+    # 保存为 JSON 文件
     output_path = os.path.join(current_dir, "eval_dataset.json")
 
     # 确保文件夹存在
@@ -116,7 +110,7 @@ def build_dataset():
         json.dump(eval_dataset_dict, f, ensure_ascii=False, indent=2)
 
     print("-" * 50)
-    print(f"🎉 任务完成！量化评估数据集已生成：\n📍 {output_path}")
+    print(f"任务完成！量化评估数据集已生成：\n {output_path}")
 
 
 if __name__ == "__main__":
